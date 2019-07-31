@@ -20,7 +20,7 @@ summary(fit)
 #(C)
 pred=predict(fit,testset)
 predictedvalues=rep(0,length(pred))
-preodictedvalues[pred>0.5]=1
+predictedvalues[pred>0.5]=1
 actual=testset$homekick
 df=data.frame(actual,predictedvalues)
 View(df)
