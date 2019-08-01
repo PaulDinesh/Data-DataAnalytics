@@ -1,0 +1,356 @@
+---
+title: "Assignment 1"
+author: '10515229'
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r global_options, include=FALSE, cache=FALSE}
+library(knitr)
+opts_chunk$set(echo=TRUE, 
+               warning=FALSE, 
+               message=FALSE,
+               cache = TRUE,
+               include = TRUE,
+               results = 'show',
+               error = TRUE)
+```
+
+## Introduction:
+
+My answers to Assignment 1 for B9IS106 are found below.
+
+### Question 1:
+
+#### 1.(a)
+
+In 1.(a), To explore the general features of dataset, the commands are as follows:
+
+```{r}
+#Quick inspection of raw data
+head(airquality) #To view the first 6 rows of the dataset
+tail(airquality) #To view the last 6 rows of the dataset
+View(airquality) #To view the dataset
+#Type of data & its dimensions
+class(airquality) #To prints the vector of names of classes 
+nrow(airquality) #To find the number of rows in the dataset
+ncol(airquality) #To find the number of columns in the dataset
+length(airquality[,1]) #To find the number of rows
+length(airquality)#To find the number of columns
+names(airquality) #To view names of columns 
+str(airquality) #To view the structure of the dataset
+help("airquality")#To view the Description, Usage, Format, Details, Source, Reference, Examples in R Documentation
+```
+
+
+#### 1.(b)
+
+In 1.(b), To perform data Cleansing the commands are as follows:
+
+```{r}
+my.data<-airquality
+
+head(my.data) #To view the first 6 rows of the dataset
+tail(my.data) #To view the last 6 rows of the dataset
+
+is.na(my.data) #To check the dataset has null values
+any(is.na(my.data)) #To check the dataset has null values
+sum(is.na(my.data)) #To find total of  null values in a dataset
+str(my.data) #To view the structure of the dataset
+colSums(is.na(my.data))  #To view the which column has null values and its total per column
+my.data.clean<-na.omit(my.data)  #To remove all rows containing NA
+```
+The `help` command gives us information regarding the 'survey' dataset and the `str` command neatly condenses and displays the internal structure of the object.
+
+From these commands, we can see that the data comes from MASS package and it contains a mixture of measurements for 237 individuals. It constitutes of12 variables. So the survey dataset has 237 rows and 12 columns.
+
+#### 1.3
+
+In 1.3 we need to print the 200th row of `survey` and get the value of pulse in this row. The commands are as follows:
+
+```{r}
+row200 <- survey[200, ]
+row200
+pulse <- row200$Pulse
+pulse
+```
+
+#### 1.4
+
+In 1.4 new column called Avg.Span is created which is the average of the span of a student's writing hand and their non-writing hand and rounded to 1 decimal place.
+
+```{r}
+Avg.Span <- round(((c(survey$Wr.Hnd) + c(survey$NW.Hnd))/2),1)
+Avg.Span
+```
+
+#### 1.5
+
+In 1.5 we are going to identify 2 factors that are unordered using the help file,
+convert them to an ordered one and confirm the output.
+
+```{r}
+## For this I am using the variables Exer and Smoke.
+##1
+levels(survey$Exer) #By this command we see that the levels are unordered
+survey$Exer<- factor(survey$Exer, levels=c("None", "Some", "Freq"), ordered = TRUE)
+survey$Exer
+levels(survey$Exer)
+
+##2
+levels(survey$Smoke)
+survey$Smoke<- factor(survey$Smoke, levels=c("Never", "Occas", "Regular", "Heavy"),
+                    ordered = TRUE)
+survey$Smoke
+levels(survey$Smoke)
+```
+
+#### 1.6
+
+In 1.6 we are Creating a table of Sex against Fold and get the combination of Sex/Fold with the largest number of students. The command goes like this.
+
+```{r}
+TableValue <- table(survey$Sex, survey$Fold)   #Creates a table Sex/Fold
+TableValue 
+max(TableValue)         # Gets maximum value from the table
+val <- which(TableValue == max(TableValue), arr.ind = TRUE)   #Bring out the row and column of the max value
+val
+Sex.Fold <- paste(rownames(TableValue)[val[1]],colnames(TableValue)[val[2]],
+                  sep = ", ")     #Gives the name of the corresponding row and column
+Sex.Fold
+```
+
+
+### Question 2
+
+#### 2.1 
+
+In 1.1, we need to load the ggplot2 package and load the `diamonds` dataset.
+
+```{r}
+install.packages("ggplot2")
+library(ggplot2)
+data(diamonds)
+```
+
+We also need to bring out the structure and top of the dataset. The commands are as follows.
+
+```{r}
+str(diamonds)    
+head(diamonds)  
+```
+
+The diamonds dataset contains different pieces of inforamtion of nearly 54,000 diamonds. The informaion regarding the diamonds are catogorized into 10 variables each giving us a clear idea on the price, color, clarity, length etc of the diamond. There are three ordered factors. So there are in total 54,000 observation. `help(diamonds)` command opens up the R Documentation regarding Diamonds dataset.
+
+#### 2.2
+
+In 2.2 we are writing a command to find weather there are any missing values in the dataset. The command is as follows
+
+```{r}
+levels(factor(is.na(diamonds))) 
+```
+
+The above command displays only one label False which indicates that there are no missing values in the dataset.
+
+#### 2.3
+
+In 2.3 the commands will return the row with the cost $1296 and the clarity of the diamond in that row.
+
+```{r}
+row.num<-which(diamonds$price==1296)   #gives row number
+row.num
+price.row <- diamonds[row.num,]     #returns the row
+price.row
+clarity <- price.row$clarity      #value of clarity in the row
+clarity
+```
+
+#### 2.4
+
+In 2.4 we use the summary() function and are describing the result of ant two variables.
+
+```{r}
+summary(diamonds)
+```
+
+Lets discuss on `carat` and `cut` variable.
+Since 'carat' is a numeric variable the summary function has brought out the range, quartiles, median and mean.
+Where as the 'cut' is a factor variable and it gives the frequencies of each factor in it.
+
+#### 2.5
+ 
+In 2.5 we use the cut() function on the carat variable to create a new variable carat.cat, by dividing it up into 3 categories: Light (0 - 0.5), Medium (0.5 - 0.8) and Heavy (0.8 - 6) and attach this new variable to the dataframe.  
+
+```{r}
+
+carat.cat<-cut(diamonds$carat, breaks = c(0,0.5, 0.8, 6), 
+               labels=c("Light", "Medium", "Heavy"))  #Broken into 3 categories 
+table(carat.cat)
+```
+
+Since the break is dividing the values in the increasing order it will be an ordered factor.
+```{r}
+IsOrdered <- levels(carat.cat)
+IsOrdered
+
+diamonds$carat.cat <- carat.cat       #To add carat.cat to the diamond dataset
+str(diamonds)       #To check whether carat.cat is add to diamonds dataset
+```
+
+#### 2.6
+
+In 2.6 we are creating a table of color against carat.cat and get the colour/carat caetgory combination with the largest number of diamonds.
+
+```{r}
+color_carat.cat<- table(diamonds$color, diamonds$carat.cat)
+color_carat.cat
+max(color_carat.cat)        #Gets the maximum value from the table
+x <- which(color_carat.cat == max(color_carat.cat) , arr.ind = TRUE) 
+#Gets the row and the column of the maximum value
+x                           
+paste(rownames(color_carat.cat)[x[1]],colnames(color_carat.cat)[x[2]],sep = ", ")       
+#Gets the row and the column names of the maximum value
+```
+
+#### 2.7
+
+In 2.7 we are creating a subset of diamonds called sub.diamonds which contains only those diamonds of colour D.
+
+```{r}
+#From the table we can get a clear view about the number of diamonds preset in color D.
+table(diamonds$color)    
+sub.diamonds<-subset(diamonds,(diamonds$color=="D"))
+sub.diamonds
+```
+From the above we can come to a conculsion that there are 6775 observation in sub.diamonds.
+
+#### 2.8
+
+In 2.8 we are using the aggregate() function to aggregate the carat and price columns of sub.diamonds to find the mean of these variables for every clarity and cut combination and save this output as a dataframe called df1.
+
+```{r}
+
+Dat_aggr<-aggregate(cbind(sub.diamonds$carat, sub.diamonds$price),
+            list(sub.diamonds$clarity, sub.diamonds$cut),
+               mean)
+
+colnames(Dat_aggr)<-c("clarity","cut","carat","price")   #Gives a proper names to the columns
+Dat_aggr
+df1<-data.frame(Dat_aggr)   #Saving the output as a new dataframe
+df1
+```
+
+#### 2.9
+
+In 2.9 we are ordering df1 by descending price.
+
+```{r}
+newdf1 <- df1[with(df1, order(-price)), ]
+newdf1
+```
+
+#### 2.10
+
+In 2.10 Lets dicuss the findings about the cut variable in diamonds dataset.
+
+The following diagram gives us a clear information of number of diamonds against each cut.
+```{r}
+ggplot(diamonds, aes(diamonds$cut)) +
+  geom_bar(fill = "#0073C2FF")
+```
+
+From the above diagram we can understand that larger number of diamonds are made with the best cut. 
+
+
+In the next diagram lets analyse the prices of the diamond against each cut.
+Lets break out the histogram of diamond prices by cut.
+```{r}
+ggplot(aes(x=price),data=diamonds)+geom_histogram(binwidth = 500,col='red')+
+  ggtitle('Histogram of price against cut')+ylab('No of Diamonds')+
+  xlab('Price of Diamond')+facet_wrap(~cut,scales="free_y")+theme_minimal()
+```
+
+According to above plot we find out that the price range does not depend on the cut as the diamonds in the Ideal cut looks cheaper when compared to the diamonds with the Fair cut.
+
+
+
+The following diagram will help us in the study of cut against clarity.
+```{r}
+ggplot(data = diamonds) + geom_bar(mapping = aes(x = cut, fill = clarity)) + 
+  ggtitle("Cut against Clarity Differentiated by Cut Bins") +
+  xlab("Cut") + ylab("No of Diamonds")
+```
+
+From the above plot we can understand that diamonds in every category of cut is made with all types of clarity.
+
+
+
+Summary of Cut variable.
+
+```{r}
+by(diamonds$price, diamonds$cut, summary)
+```
+
+The above table gives us the range, quartiles, mean and median of each category of cut.
+
+
+
+### Question 3
+
+In this we are creating a function called `fun1` which takes matix as an input and returns a list which has the following
+i) The input matrix
+ii) The row means of matrix
+iii) The row column of matrix
+The function must also allow to specify a different operation instead of mean.
+
+```{r}
+fun1 <- function(newVar,operation=mean)
+{
+  #Brings the matrix
+  mat_val <- (newVar)
+  mat_val
+  
+  #To do the row wise operations
+  t<-nrow(newVar)    
+  t
+  total=c(0)
+  count <- 0
+  for (val in c(1:t)) {
+    total[val] <- operation(newVar[val,])
+    total
+    count <- count + 1
+  }
+  row_val <- c(total)
+  row_val
+  
+  #To do the column wise operations
+  q<-ncol(newVar)
+  q
+  total1=c(0)
+  count <- 0
+  for (val in c(1:q)) {
+    total1[val] <- operation(newVar[,val])
+    total1
+    count <- count + 1
+  }
+  col_val <- c(total1)
+  col_val
+  
+  all_val <- list(mat_val, row_val, col_val)
+  all_val
+}
+```
+
+We can test the function using the follwoing test data 
+
+```{r}
+set.seed(13)
+
+mat <- matrix(sample(5:20, 10 * 4, replace = TRUE), 10, 4)
+
+fun1(mat)  #It returns the list of matrix, row means and column means
+
+fun1(mat,sum)   #It returns the list of matrix, row sums and column sums
+```
+

@@ -1,0 +1,279 @@
+---
+title: "Assignment 1"
+author: '10515229'
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r global_options, include=FALSE, cache=FALSE}
+library(knitr)
+opts_chunk$set(echo=TRUE, 
+               warning=FALSE, 
+               message=FALSE,
+               cache = TRUE,
+               include = TRUE,
+               results = 'show',
+               error = TRUE)
+```
+
+## Introduction:
+
+My answers to Assignment 1 for B9IS106 are found below.
+
+### Question 1:
+
+#### 1.(a)
+
+In 1.(a), To explore the general features of dataset, the commands are as follows:
+
+```{r}
+#Quick inspection of raw data
+head(airquality) #To view the first 6 rows of the dataset
+tail(airquality) #To view the last 6 rows of the dataset
+View(airquality) #To view the dataset
+#Type of data & its dimensions
+class(airquality) #To prints the vector of names of classes 
+nrow(airquality) #To find the number of rows in the dataset
+ncol(airquality) #To find the number of columns in the dataset
+length(airquality[,1]) #To find the number of rows
+length(airquality)#To find the number of columns
+names(airquality) #To view names of columns 
+str(airquality) #To view the structure of the dataset
+help("airquality")#To view the Description, Usage, Format, Details, Source, Reference, Examples in R Documentation
+```
+
+
+#### 1.(b)
+
+In 1.(b), To perform data Cleansing the commands are as follows:
+
+```{r}
+my.data<-airquality
+
+head(my.data) #To view the first 6 rows of the dataset
+tail(my.data) #To view the last 6 rows of the dataset
+
+is.na(my.data) #To check the dataset has null values #if TRUE= null, FALSE= not null
+any(is.na(my.data)) #To check the dataset has null values
+sum(is.na(my.data)) #To find total of  null values in a dataset
+str(my.data) #To view the structure of the dataset
+colSums(is.na(my.data))  #To view the which column has null values and its total per column
+nrow(my.data) #No. of rows before cleansing
+my.data.clean<-na.omit(my.data)  #To remove all rows containing NA
+
+any(is.na(my.data.clean)) #To check the dataset has any null values after cleansing
+nrow(my.data.clean) #To check the number of rows not affected after cleansing
+```
+
+#### 1.(c)
+
+In 1.(c) Computation of central and variational measures. The commands are as follows:
+
+```{r}
+head(my.data.clean)
+View(my.data.clean)
+temp<-my.data.clean$Temp #To extract temp column from the cleansed dataset
+
+temp_mean= mean(temp) #To find mean of temp
+temp_mean
+temp_median=median(temp) #To find median of temp
+temp_median
+temp_occurence<-table(as.vector(temp)) #To find occurence of temp
+temp_occurence
+names(temp_occurence)[temp_occurence==max(temp_occurence)] #To find mode of temp
+
+temp_sd=sd(temp) #To find standard deviation of Temp
+temp_sd
+temp_var=var(temp) #To find variance of temp
+temp_var
+temp_sd_sqrt_var=sqrt(temp_var) #sqrt of var = sd
+temp_sd_sqrt_var
+temp_range=range(temp) #To find Range of temp
+temp_range
+quantile(temp) #To find quantile of temp
+summary(temp) #To find Mininum & Maximum value, 1st, 2nd, 3rd quantile , mean of temp
+```
+
+#### 1.(d)
+
+In 1.(d) boxplot technique to detect outlier of ‘wind’ attribute
+```{r}
+Wind=my.data.clean$Wind
+   
+sort_Wind= Wind[order(Wind)] #To sort the column wind 
+
+fivedata_Wind=fivenum(sort_Wind) #fivenum returns a vector of length five (minimum, lower-hinge, median, upper-hinge, maximum)
+
+fivedata_Wind
+
+IQR=fivedata_Wind[4]-fivedata_Wind[2] #InterQuartile Range
+IQR 
+QLw=fivedata_Wind[2]-1.5*IQR #Lower Quartile Range
+QLw 
+QUw=fivedata_Wind[4]+1.5*IQR #Upper Quartile Range
+QUw
+Int=c(QLw,QUw)
+vect=c()
+length(Wind) #number of rows in column Wind
+#The values outside Inter & Outer Quartile range are outliers
+for(i in Wind)
+{if((i>QUw)&(i>QLw))
+{vect=c(vect,i)}
+  }
+vect
+length(vect) #Number of outliers in column Wind
+View(vect) #To view the outliers
+#Alternatively we can find the outliers using the statistics of boxplot
+boxplot(Wind)
+boxplot.stats(Wind)
+#The last line of the statistics has the outliers
+```
+
+#### 2(a)
+
+In 2(a) Generalised Linear Model
+```{r}
+dataset <- read.csv("http://users.stat.ufl.edu/~winner/data/nfl2008_fga.csv")
+library(caTools) # useful to split data to training and test datasets
+
+set.seed(1456)
+n=nrow(dataset)
+n
+indexes = sample(n,n*(80/100)) #To split the dataset
+trainset=dataset[indexes,]# training dataset
+testset =dataset[-indexes,]# test dataset
+#(a)  
+table(trainset$homekick) 
+```
+By identifing the output variable the appropriate glm to be used is logistic regression as the homekick column contains binary outcomes
+#### 2(b)
+```{r}
+fit=glm(homekick~togo+ydline+kicker,data=trainset,family='binomial')
+summary(fit)
+```
+To consider the significanse of the variable p-value should be less than alpha
+since p-value for togo is less than alpha =0.05 therefore, only the input variable togo is significant
+
+#### 2(C)
+Prediction of the test dataset using the trained model
+```{r}
+pred=predict(fit,testset)
+predicted_values=rep(0,length(pred))
+predicted_values[pred>0.5]=1
+actual=testset$homekick
+df=data.frame(actual,predicted_values)
+View(df)
+head(df)
+```
+#### 2(D)
+```{r}
+confusion_matrix=table(predictedvalues, actual)
+confusion_matrix
+View(confusion_matrix)
+```
+The tabular representation of Actual vs Predicted values can be obtained in confusion matrix
+Accuracy of the model can be obtained by the below formula
+```{r}
+accuracy=mean(predictedvalues == actual) # correctness of prediction
+accuracy
+```
+
+
+#### 3(A)
+
+ Assumption Validation using graphical visualization.  
+```{r}
+library(forecast)
+link='http://www.stat.ufl.edu/~winner/data/wage_cpi.csv'
+data_wage_cpi=read.csv(link)
+head(data_wage_cpi)
+str(data_wage_cpi)
+x=data_wage_cpi$wage
+class(x)
+tsvar <- ts(x,frequency=1)#to convert to timeseries data
+class(tsvar)
+```
+Validate the assumption 1)Stationarity 2)Normality
+```{r}
+plot(tsvar)
+```
+By plotting the timeseries data we can see that it is non-stationary in mean
+
+To make the timeseries data to stationary in mean diff function is applied
+```{r}
+tsvar=diff(log(tsvar)) # to make ts stationary in mean and variance use diff & log
+plot(tsvar) 
+
+qqnorm(tsvar) # if the graph is straight slope line the time series data is normal
+```
+From the above plots the assumption of timeseries data to be 1)Stationarity 2)Normality is true
+
+
+#### 3(b) 
+
+Fit the optimized model for ‘wage’ and provide the coefficient estimates for the fitted model. 
+
+
+By using auto arima The one with the lowest BIC and AIC should be our choice of the optimized model
+```{r}
+
+#Seasonal =F & T test is performed to check AIC & BIC 
+auto.fit<-auto.arima(tsvar,seasonal=T) #automatic way to find 
+auto.fit
+
+auto.fit<-auto.arima(tsvar,seasonal=F) #automatic way to find 
+auto.fit
+
+```
+Akaike information criterion(AIC) &  Bayesian information criterion(BIC) is same for both the tests
+
+#### 3 (c)
+
+Based on the output of auto arima 
+The order of AR is 2
+The order of AR is 1
+#### 3 (d)
+Forecast h=10 step ahead prediction of wage on the plot of the original time series
+
+Visualization the prediction for 10 years
+```{r}
+auto.fcast<-forecast(auto.fit,h=10)
+plot(auto.fcast)
+```
+
+#### 4(a)
+
+```{r}
+library(MASS)
+dataset <- read.csv("http://users.stat.ufl.edu/~winner/data/nfl2008_fga.csv")
+View(dataset)
+dataset.lda<-lda(qtr~togo+ydline+kicker,data=dataset)
+dataset.lda
+```
+Two LDA's as most important can be chosen as the sum of LD1+LD2 is >90 variance so select LD1 and LD2
+
+No. of LDA  = min(# of categories in output-1,# of input variable)
+            = min(5-1,3)
+No. of LDA =3
+
+LDA1 = 0.066togo + 0.077ydline - 0.041kicker
+LDA2 = 0.124togo - 0.071ydline - 0.060kicker
+
+#### 4(b)
+
+PCA
+
+```{r}
+head(dataset)
+data=cbind(dataset$togo,dataset$ydline,dataset$kicker)
+data1=na.omit(data)
+fit<-princomp(data1)
+summary(fit) #print variance acconted for,
+loadings(fit) #pc loadings
+plot(fit,type="lines") #scree plot
+
+```
+This shows that first principal component explains 33.33% variance. Second component explains 66.7% variance. Third component explains 100% variance. So, we select first two components as important principle components involving at least 90% of dataset variation
+
+It also can be answered based on scree plot. Based on the scree plot the second component exceeds 90%.Therefore first 2 components are chosen.
